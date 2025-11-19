@@ -14,6 +14,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
+    PERCENTAGE,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
@@ -174,6 +175,17 @@ SENSOR_TYPES: tuple[SolisSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=2,
         value_fn=lambda data: _coerce_float(data.get("fac")),
+    ),
+    # Battery Monitoring
+    SolisSensorEntityDescription(
+        key="battery_soc",
+        translation_key="battery_soc",
+        name="Battery State of Charge",
+        native_unit_of_measurement=PERCENTAGE,
+        device_class=SensorDeviceClass.BATTERY,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value_fn=lambda data: _coerce_float(data.get("batteryPercent")),
     ),
     # Status and Diagnostics
     SolisSensorEntityDescription(

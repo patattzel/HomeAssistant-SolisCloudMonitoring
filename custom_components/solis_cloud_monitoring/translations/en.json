@@ -57,6 +57,9 @@
       "grid_frequency": {
         "name": "Grid Frequency"
       },
+      "battery_soc": {
+        "name": "Battery State of Charge"
+      },
       "inverter_temperature": {
         "name": "Inverter Temperature"
       },
