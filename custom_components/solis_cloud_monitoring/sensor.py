@@ -51,6 +51,22 @@ def _coerce_float(value: Any) -> float | None:
         return None
 
 
+def _battery_power_origin(data: dict[str, Any]) -> float | None:
+    """Return battery power in watts from available API fields."""
+    for key in ("batteryPowerOrigin", "batteryPowerOriginV2"):
+        value = _coerce_float(data.get(key))
+        if value is not None:
+            return value
+
+    # Fallback to kW fields if origin values are absent
+    for key in ("batteryPower", "batteryPowerV2"):
+        value_kw = _coerce_float(data.get(key))
+        if value_kw is not None:
+            return value_kw * 1000
+
+    return None
+
+
 # Define all sensor types
 SENSOR_TYPES: tuple[SolisSensorEntityDescription, ...] = (
     # Power Sensors
@@ -195,7 +211,7 @@ SENSOR_TYPES: tuple[SolisSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
-        value_fn=lambda data: _coerce_float(data.get("batteryPowerOrigin")),
+        value_fn=_battery_power_origin,
     ),
     # Status and Diagnostics
     SolisSensorEntityDescription(
