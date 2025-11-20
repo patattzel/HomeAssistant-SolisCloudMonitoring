@@ -75,6 +75,7 @@ Sensors follow the pattern `sensor.solis_<last4serial>_<sensor_key>`, for exampl
 - `pv1_voltage` V, `pv1_current` A, `pv1_power` W
 - `grid_voltage` V, `grid_current` A, `grid_frequency` Hz
 - `battery_soc` %
+- `battery_power_origin` W (raw battery power)
 - `inverter_temperature` °C
 - `daily_runtime` hours
 - `inverter_state` enum (offline, standby, generating)

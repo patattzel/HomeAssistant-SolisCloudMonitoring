@@ -60,6 +60,9 @@
       "battery_soc": {
         "name": "Battery State of Charge"
       },
+      "battery_power_origin": {
+        "name": "Battery Power (Raw)"
+      },
       "inverter_temperature": {
         "name": "Inverter Temperature"
       },

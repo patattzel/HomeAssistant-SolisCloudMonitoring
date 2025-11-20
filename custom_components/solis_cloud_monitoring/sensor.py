@@ -187,6 +187,16 @@ SENSOR_TYPES: tuple[SolisSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         value_fn=lambda data: _coerce_float(data.get("batteryPercent")),
     ),
+    SolisSensorEntityDescription(
+        key="battery_power_origin",
+        translation_key="battery_power_origin",
+        name="Battery Power (Raw)",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        value_fn=lambda data: _coerce_float(data.get("batteryPowerOrigin")),
+    ),
     # Status and Diagnostics
     SolisSensorEntityDescription(
         key="inverter_temperature",
