@@ -53,16 +53,25 @@ def _coerce_float(value: Any) -> float | None:
 
 def _battery_power_origin(data: dict[str, Any]) -> float | None:
     """Return battery power in watts from available API fields."""
+    station_detail = data.get("station_detail") if isinstance(data, dict) else None
+    search_spaces: tuple[dict[str, Any] | None, ...] = (data, station_detail)
+
     for key in ("batteryPowerOrigin", "batteryPowerOriginV2"):
-        value = _coerce_float(data.get(key))
-        if value is not None:
-            return value
+        for space in search_spaces:
+            if not isinstance(space, dict):
+                continue
+            value = _coerce_float(space.get(key))
+            if value is not None:
+                return value
 
     # Fallback to kW fields if origin values are absent
     for key in ("batteryPower", "batteryPowerV2"):
-        value_kw = _coerce_float(data.get(key))
-        if value_kw is not None:
-            return value_kw * 1000
+        for space in search_spaces:
+            if not isinstance(space, dict):
+                continue
+            value_kw = _coerce_float(space.get(key))
+            if value_kw is not None:
+                return value_kw * 1000
 
     return None
 

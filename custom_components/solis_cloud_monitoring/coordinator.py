@@ -21,6 +21,7 @@ class SolisCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, 
         hass: HomeAssistant,
         api: SolisCloudAPI,
         inverter_serials: list[str],
+        inverter_stations: dict[str, str],
     ) -> None:
         """Initialize the coordinator.
         
@@ -28,6 +29,7 @@ class SolisCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, 
             hass: Home Assistant instance
             api: Solis Cloud API client
             inverter_serials: List of inverter serial numbers to monitor
+            inverter_stations: Mapping of inverter serials to station IDs
         """
         super().__init__(
             hass,
@@ -37,6 +39,7 @@ class SolisCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, 
         )
         self.api = api
         self.inverter_serials = inverter_serials
+        self.inverter_stations = inverter_stations
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         """Fetch data from Solis Cloud API.
@@ -48,12 +51,33 @@ class SolisCloudDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, 
             UpdateFailed: When update fails
         """
         data: dict[str, dict[str, Any]] = {}
+        station_cache: dict[str, dict[str, Any]] = {}
 
         try:
             # Fetch data for each inverter
             for serial in self.inverter_serials:
                 try:
                     inverter_data = await self.api.get_inverter_details(serial)
+
+                    # Attach station data if station ID is known
+                    station_id = self.inverter_stations.get(serial)
+                    if station_id:
+                        if station_id not in station_cache:
+                            try:
+                                station_cache[station_id] = await self.api.get_station_detail(
+                                    station_id
+                                )
+                            except SolisCloudAPIError as station_err:
+                                _LOGGER.debug(
+                                    "Failed to fetch station %s: %s",
+                                    station_id,
+                                    station_err,
+                                )
+                        if station_id in station_cache:
+                            # Copy to avoid mutating cached payload
+                            inverter_data = dict(inverter_data)
+                            inverter_data["station_detail"] = station_cache[station_id]
+
                     data[serial] = inverter_data
                     pac_value = inverter_data.get("pac")
                     try:

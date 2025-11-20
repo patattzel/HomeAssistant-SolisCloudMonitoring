@@ -17,6 +17,7 @@ from .const import (
     CONF_API_KEY,
     CONF_API_SECRET,
     CONF_INVERTER_SERIALS,
+    CONF_INVERTER_STATIONS,
     DOMAIN,
     MAX_INVERTERS,
 )
@@ -79,8 +80,26 @@ class SolisCloudConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(user_input[CONF_API_KEY])
                 self._abort_if_unique_id_configured()
 
-                # Store inverter serials for entry
+        # Store inverter serials for entry
                 inverter_serials = [inv.get("sn") for inv in inverters if inv.get("sn")]
+                
+                # Map inverter serials to station IDs when available
+                inverter_stations = {}
+                for inv in inverters:
+                    sn = inv.get("sn")
+                    if not sn:
+                        continue
+                    station_id = (
+                        inv.get("stationId")
+                        or inv.get("station_id")
+                        or inv.get("stationCode")
+                        or inv.get("stationcode")
+                        or inv.get("stationid")
+                        or inv.get("plantId")
+                        or inv.get("plant_id")
+                    )
+                    if station_id:
+                        inverter_stations[sn] = str(station_id)
                 
                 return self.async_create_entry(
                     title="Solis Cloud Monitoring",
@@ -88,6 +107,7 @@ class SolisCloudConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_API_KEY: user_input[CONF_API_KEY],
                         CONF_API_SECRET: user_input[CONF_API_SECRET],
                         CONF_INVERTER_SERIALS: inverter_serials,
+                        CONF_INVERTER_STATIONS: inverter_stations,
                     },
                 )
 

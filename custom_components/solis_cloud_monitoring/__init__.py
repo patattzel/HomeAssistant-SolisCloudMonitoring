@@ -9,7 +9,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SolisCloudAPI
-from .const import CONF_API_KEY, CONF_API_SECRET, CONF_INVERTER_SERIALS, DOMAIN
+from .const import (
+    CONF_API_KEY,
+    CONF_API_SECRET,
+    CONF_INVERTER_SERIALS,
+    CONF_INVERTER_STATIONS,
+    DOMAIN,
+)
 from .coordinator import SolisCloudDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,6 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api_key = entry.data[CONF_API_KEY]
     api_secret = entry.data[CONF_API_SECRET]
     inverter_serials = entry.data[CONF_INVERTER_SERIALS]
+    inverter_stations = entry.data.get(CONF_INVERTER_STATIONS, {})
 
     # Create API client
     session = async_get_clientsession(hass)
@@ -32,6 +39,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass,
         api,
         inverter_serials,
+        inverter_stations,
     )
 
     # Fetch initial data

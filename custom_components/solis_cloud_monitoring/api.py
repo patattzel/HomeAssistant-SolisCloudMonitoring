@@ -12,7 +12,12 @@ from typing import Any
 
 import aiohttp
 
-from .const import API_BASE_URL, API_INVERTER_DETAIL, API_INVERTER_LIST
+from .const import (
+    API_BASE_URL,
+    API_INVERTER_DETAIL,
+    API_INVERTER_LIST,
+    API_STATION_DETAIL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -167,4 +172,24 @@ class SolisCloudAPI:
             )
 
         _LOGGER.debug("Retrieved details for inverter %s", serial_number)
+        return data
+
+    async def get_station_detail(self, station_id: str) -> dict[str, Any]:
+        """Get detailed information for a specific station.
+        
+        Args:
+            station_id: Station ID
+            
+        Returns:
+            Station details dictionary
+            
+        Raises:
+            SolisCloudAPIError: On API or network errors
+        """
+        data = await self._request(API_STATION_DETAIL, {"id": station_id})
+
+        if not data:
+            raise SolisCloudAPIError(f"No data returned for station {station_id}")
+
+        _LOGGER.debug("Retrieved details for station %s", station_id)
         return data
